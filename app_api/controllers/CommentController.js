@@ -118,25 +118,31 @@ const deleteComment = async function (req, res) {
 
   const updateComment = async function (req, res) {
     try {
-      await Venue.findById(req.params.venueid)
-        .select("comments")
-        .exec()
-        .then(function (venue) {
-          try {
-            let comment = venue.comments.id(req.params.commentid);
-            comment.set(req.body);
-            venue.save().then(function () {
-              updateRating(venue._id, false);
-              createResponse(res, "201", comment);
-            });
-          } catch (error) {
-            createResponse(res, "400", error);
-          }
-        });
+        const venue = await Venue.findById(req.params.venueid).select("comments").exec();
+        if (!venue) {
+            return createResponse(res, "400", "Venue not found");
+        }
+
+        const comment = venue.comments.id(req.params.commentid);
+        if (!comment) {
+            return createResponse(res, "400", "Comment not found");
+        }
+
+        if (!req.body || Object.keys(req.body).length === 0) {
+            return createResponse(res, "400", "Request body is empty or invalid");
+        }
+
+        comment.set(req.body);
+
+        await venue.save();
+        updateRating(venue.id, false);
+        createResponse(res, "201", comment);
     } catch (error) {
-      createResponse(res, "400", error);
-    }
-  };
+        console.error("Error updating comment:", error); // Loglama
+        createResponse(res, "400", error.message || "Unknown error");
+    }
+};
+
 
 
 module.exports={
