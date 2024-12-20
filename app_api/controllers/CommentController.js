@@ -88,20 +88,32 @@ const deleteComment = async function (req, res) {
 
   const getComment = async function (req, res) {
     try {
-        
-        const venue = await Venue.findById(req.params.venueid).select("comments").exec();
-
-        if (!venue) {
-            return createResponse(res, 404, { message: "Venue not found" });
-        }
-
-        
-        createResponse(res, 200, venue.comments);
+      await Venue.findById(req.params.venueid)
+        .select("name comments")
+        .exec()
+        .then(function (venue) {
+          var response, comment;
+          if (!venue) {
+            createResponse(res, "404", "Mekanid yanlış");
+          } else if (venue.comments.id(req.params.commentid)) {
+            comment = venue.comments.id(req.params.commentid);
+            response = {
+              venue: {
+                name: venue.name,
+                id: req.params.id,
+              },
+              comment: comment,
+            };
+            createResponse(res, "200", response);
+          } else {
+            createResponse(res, "404", "Yorum id yanlış");
+          }
+        });
     } catch (error) {
-        console.error("Error fetching comments:", error);
-        createResponse(res, 500, error);
+      createResponse(res, "404", "Mekan bulunamadı");
     }
-};
+  };
+  
 
 
 const updateComment = async function (req, res) {

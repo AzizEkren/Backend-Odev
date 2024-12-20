@@ -6,10 +6,58 @@ res.status(status).json(content);
 
 
 }
+var converter = (function () {
+    var earthRadius = 6371; // km
+    var radian2Kilometer = function (radian) {
+        return parseFloat(radian * earthRadius);
+    };
+    var kilometer2Radian = function (distance) {
+        return parseFloat(distance / earthRadius);
+    };
+    return {
+        radian2Kilometer,
+        kilometer2Radian,
+    };
+})();
 
-const listVenues=function(req,res){
-    createResponse(res,"200",{"status":"Success"});
-}
+const listVenues = function (req, res) {
+    var lat = parseFloat(req.query.lat) || 0;
+    var long = parseFloat(req.query.long) || 0;
+    var point = { type: "Point", coordinates: [lat, long] };
+    var geoOptions = { distanceField: "dis", spherical: true, maxDistance: converter.radian2Kilometer(100) };
+  
+    try {
+      Venue.aggregate([
+        {
+          $geoNear: {
+            near: point,
+            ...geoOptions,
+          },
+        },
+      ])
+        .then((result) => {
+          const venues = result.map(function (venue) {
+            return {
+              distance: converter.kilometer2Radian(venue.dis),
+              name: venue.name,
+              address: venue.address,
+              rating: venue.rating,
+              foodAndDrink: venue.foodanddrink,
+              id: venue._id,
+            };
+          });
+  
+          if (venues.length > 0) {
+            createResponse(res, "200", venues);
+          } else {
+            createResponse(res, "200", { "status": "Civarda mekan yok" });
+          }
+        });
+    } catch (error) {
+      createResponse(res, "404", error);
+    }
+  };
+  
 
 const addVenue=async function(req,res){
     try{
@@ -40,9 +88,18 @@ const addVenue=async function(req,res){
     }
 }
 
-const getVenue=function(req,res){
-    createResponse(res,"200",{"status":"Success"});
-}
+const getVenue = async function (req, res) {
+    try {
+      await Venue.findById(req.params.venueid)
+        .exec()
+        .then(function (venue) {
+          createResponse(res, "200", venue);
+        });
+    } catch (error) {
+      createResponse(res, "404", { status: "Böyle bir mekan yok" });
+    }
+  };
+  
 
 const updateVenue = async function (req, res) {
     try {
