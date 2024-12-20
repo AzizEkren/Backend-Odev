@@ -86,7 +86,7 @@ const deleteComment = async function (req, res) {
   };
   
 
-  const getComments = async function (req, res) {
+  const getComment = async function (req, res) {
     try {
         
         const venue = await Venue.findById(req.params.venueid).select("comments").exec();
