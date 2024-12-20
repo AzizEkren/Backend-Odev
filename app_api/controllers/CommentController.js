@@ -51,14 +51,14 @@ var calculateLastRating = function (incomingVenue, isDeleted) {
 
 const addComment = async function (req, res) {
     try {
-        await Venue.findById(req.params.venueid)
-            .select("comments")
-            .exec()
-            .then((incomingVenue) => {
-                createComment(req, res, incomingVenue);
-            });
+        const venue = await Venue.findById(req.params.venueid).select("comments");
+        if (!venue) {
+            return createResponse(res, 404, { message: "Venue not found" });
+        }
+        createComment(req, res, venue);
     } catch (error) {
-        createResponse(res, 400,error)
+        console.error("Error in addComment:", error);
+        createResponse(res, 400, error);
     }
 };
 
