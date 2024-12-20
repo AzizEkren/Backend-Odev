@@ -100,7 +100,7 @@ const updateComment = async function (req, res) {
                     let comment = venue.comments.id(req.params.commentid);
                     comment.set(req.body);
                     venue.save().then(function () {
-                        updateRating(venue._id, false);
+                        updateRating(venue.id, false);
                         createResponse(res, "201", comment);
                     });
                 } catch (error) {
