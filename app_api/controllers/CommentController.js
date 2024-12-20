@@ -116,27 +116,27 @@ const deleteComment = async function (req, res) {
   
 
 
-const updateComment = async function (req, res) {
+  const updateComment = async function (req, res) {
     try {
-        await Venue.findById(req.params.venueid)
-            .select("comments")
-            .exec()
-            .then(function (venue) {
-                try {
-                    let comment = venue.comments.id(req.params.commentid);
-                    comment.set(req.body);
-                    venue.save().then(function () {
-                        updateRating(venue.id, false);
-                        createResponse(res, "201", comment);
-                    });
-                } catch (error) {
-                    createResponse(res, "400", error);
-                }
+      await Venue.findById(req.params.venueid)
+        .select("comments")
+        .exec()
+        .then(function (venue) {
+          try {
+            let comment = venue.comments.id(req.params.commentid);
+            comment.set(req.body);
+            venue.save().then(function () {
+              updateRating(venue._id, false);
+              createResponse(res, "201", comment);
             });
+          } catch (error) {
+            createResponse(res, "400", error);
+          }
+        });
     } catch (error) {
-        createResponse(res, "400", error);
-    }
-};
+      createResponse(res, "400", error);
+    }
+  };
 
 
 module.exports={
