@@ -116,8 +116,14 @@ const deleteComment = async function (req, res) {
   
 
 
-  const updateComment = async function (req, res) {
+
+const updateComment = async function (req, res) {
     try {
+        // Geçerli ObjectId formatını kontrol et
+        if (!mongoose.Types.ObjectId.isValid(req.params.venueid) || !mongoose.Types.ObjectId.isValid(req.params.commentid)) {
+            return createResponse(res, "400", "Invalid venue or comment ID");
+        }
+
         // Yorumun bulunduğu venue'yu dinamik olarak bul
         const venue = await Venue.findOne({ "comments._id": req.params.commentid }).select("comments").exec();
 
@@ -153,6 +159,7 @@ const deleteComment = async function (req, res) {
         return createResponse(res, "400", error.message || "Unknown error");
     }
 };
+
 
 
 
