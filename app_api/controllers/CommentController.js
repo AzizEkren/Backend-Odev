@@ -86,9 +86,23 @@ const deleteComment = async function (req, res) {
   };
   
 
-const getComment=function(req,res){
-    createResponse(res,"200",{"status":"Success"});
-}
+  const getComments = async function (req, res) {
+    try {
+        
+        const venue = await Venue.findById(req.params.venueid).select("comments").exec();
+
+        if (!venue) {
+            return createResponse(res, 404, { message: "Venue not found" });
+        }
+
+        
+        createResponse(res, 200, venue.comments);
+    } catch (error) {
+        console.error("Error fetching comments:", error);
+        createResponse(res, 500, error);
+    }
+};
+
 
 const updateComment = async function (req, res) {
     try {
