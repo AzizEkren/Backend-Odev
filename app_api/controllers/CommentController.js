@@ -123,8 +123,19 @@ const deleteComment = async function (req, res) {
             return createResponse(res, "400", "Venue not found");
         }
 
+        if (!venue.comments || venue.comments.length === 0) {
+            return createResponse(res, "400", "No comments found for this venue");
+        }
+
+        const { Types } = require("mongoose");
+        if (!Types.ObjectId.isValid(req.params.commentid)) {
+            return createResponse(res, "400", "Invalid comment ID");
+        }
+
         const comment = venue.comments.id(req.params.commentid);
         if (!comment) {
+            console.log("Comments array:", venue.comments); // Debugging
+            console.log("Requested comment ID:", req.params.commentid); // Debugging
             return createResponse(res, "400", "Comment not found");
         }
 
@@ -142,6 +153,7 @@ const deleteComment = async function (req, res) {
         createResponse(res, "400", error.message || "Unknown error");
     }
 };
+
 
 
 
