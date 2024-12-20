@@ -12,7 +12,7 @@ var createComment = function (req, res, incomingVenue) {
         incomingVenue.save().then(function (venue) {
             var comments = venue.comments;
             var comment = venue.comments[comments.length - 1];
-            updateRating(venue._id, false);
+            updateRating(venue.id, false);
             createResponse(res, "201", comment);
         });
     } catch (error) {
@@ -73,7 +73,7 @@ const deleteComment = async function (req, res) {
             let comment = venue.comments.id(req.params.commentid);
             comment.deleteOne();
             venue.save().then(function () {
-              updateRating(venue._id, true);
+              updateRating(venue.id, true);
               createResponse(res, "200", `status: ${comment.author} isimli kişinin yorumu silindi`);
             });
           } catch (error) {
