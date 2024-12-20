@@ -118,25 +118,42 @@ const deleteComment = async function (req, res) {
 
   const updateComment = async function (req, res) {
     try {
-      await Venue.findById(req.params.venueid)
-        .select("comments")
-        .exec()
-        .then(function (venue) {
-          try {
-            let comment = venue.comments.id(req.params.commentid);
-            comment.set(req.body);
-            venue.save().then(function () {
-              updateRating(venue._id, false);
-              createResponse(res, "201", comment);
-            });
-          } catch (error) {
-            createResponse(res, "400", error);
-          }
-        });
+        // Yorumun bulunduğu venue'yu dinamik olarak bul
+        const venue = await Venue.findOne({ "comments._id": req.params.commentid }).select("comments").exec();
+
+        if (!venue) {
+            return createResponse(res, "400", "Venue or comment not found");
+        }
+
+        // İlgili yorumu al
+        const comment = venue.comments.id(req.params.commentid);
+        if (!comment) {
+            return createResponse(res, "400", "Comment not found");
+        }
+
+        // Gelen verilerle yorumu güncelle
+        if (!req.body || Object.keys(req.body).length === 0) {
+            return createResponse(res, "400", "Request body is empty or invalid");
+        }
+
+        comment.set(req.body);
+
+        // Güncellenmiş venue'yu kaydet
+        await venue.save();
+
+        // Puanlama sistemini güncelle
+        updateRating(venue._id, false);
+
+        // Başarılı yanıt dön
+        return createResponse(res, "201", comment);
+
     } catch (error) {
-      createResponse(res, "400", error);
-    }
-  };
+        // Hata durumunda yanıt dön
+        console.error("Error updating comment:", error); // Hataları loglayın
+        return createResponse(res, "400", error.message || "Unknown error");
+    }
+};
+
 
 
 
