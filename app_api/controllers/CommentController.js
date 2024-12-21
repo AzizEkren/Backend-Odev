@@ -112,8 +112,6 @@ const deleteComment = async function (req, res) {
     } catch (error) {
       createResponse(res, "404", "Mekan bulunamadı");
     }
-    var id = pm.response.json().comment.id;
-pm.environment.set("commentid", id);
 
   };
   
